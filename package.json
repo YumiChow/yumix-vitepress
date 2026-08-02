@@ -1,0 +1,61 @@
+{
+  "name": "@yumix/vitepress",
+  "version": "1.0.0",
+  "description": "Yumi's VitePress Toolkit",
+  "main": "./dist/node/index.mjs",
+  "module": "./dist/node/index.mjs",
+  "types": "./dist/node/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/node/index.d.ts",
+      "import": "./dist/node/index.mjs"
+    },
+    "./theme": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "yumi",
+    "vitepress",
+    "toolkit"
+  ],
+  "homepage": "https://github.com/YumiChow/yumix-vitepress",
+  "bugs": {
+    "url": "https://github.com/YumiChow/yumix-vitepress/issues",
+    "email": "info@yumichow.com"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Yumi Chow",
+    "email": "info@yumichow.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YumiChow/yumix-vitepress.git"
+  },
+  "dependencies": {
+    "gray-matter": "^4",
+    "picomatch": "^4",
+    "vitepress": "^2.0.0-alpha",
+    "vue": "^3.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "@types/picomatch": "^4.0.3",
+    "@yumix/eslint": "^1.0.4",
+    "unbuild": "^3.6.1",
+    "vue-sfc-transformer": "^0.2.5",
+    "vue-tsc": "^3.3.9"
+  }
+}

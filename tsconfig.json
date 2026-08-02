@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "esnext",
+    "types": [
+      "node"
+    ],
+    "declaration": true,
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ]
+  },
+  "include": [
+    "./"
+  ],
+  "exclude": [
+    "node_modules/",
+    "dist/"
+  ]
+}
