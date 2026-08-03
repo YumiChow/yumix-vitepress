@@ -1,6 +1,8 @@
 import type { DefaultTheme } from 'vitepress'
 import nodePath from 'node:path'
-import type { ConfigPlugin } from '..'
+import type {
+  ConfigPlugin, ConfigWorker
+} from '..'
 import type { FileTree } from './file'
 
 export interface NavigationPluginConfig {
@@ -8,19 +10,7 @@ export interface NavigationPluginConfig {
   autoNavbar: Record<string, AutoNavigationConfig[]>
 }
 
-export interface NavigationFrontmatter {
-  /**
-   * Specify the names of the child nodes to display in the sidebar tree of all their ancestor root nodes.
-   *
-   * - `string[]`: Only specific child nodes are displayed in order. To display the remaining child nodes after the specified child nodes, please add `"..."` to the end of `string[]`.
-   * - `true`: Display all child nodes.
-   * - `false`: Hide all child nodes.
-   * @default true
-   */
-  order?: string[] | boolean
-  name?: string
-  collapsed?: boolean
-}
+export interface NavigationFrontmatter { collapsed?: boolean }
 
 export interface AutoNavigationConfig {
   /**
@@ -33,22 +23,24 @@ export interface AutoNavigationConfig {
   deep: number
 }
 
-export const generateSidebar: ConfigPlugin<DefaultTheme.SidebarItem | null, [url: string, deep: number]> = (
+export const generateSidebar: ConfigWorker<DefaultTheme.SidebarItem | null, [url: string, deep: number]> = (
   _config, ctx, url: string, deep: number
 ) => {
   const traverse = (
     node: FileTree, traverseDeep: number
   ): DefaultTheme.SidebarItem => {
     const sidebar: DefaultTheme.SidebarItem = {
-      text: node.file?.data.name ?? node.file?.data.title ?? nodePath.basename(node.url),
-      link: node.isPage ? node.url : undefined,
+      text: nodePath.basename(
+        node.path, nodePath.extname(node.path)
+      ),
+      link: node.file?.data.layout !== 'dir' ? node.url : undefined,
       collapsed: node.file?.data.collapsed ?? false,
       items: []
     }
 
     const children = node.file?.data.order
 
-    if (node.isPage || children === false || traverseDeep <= 1) return sidebar
+    if (children === false || traverseDeep <= 1) return sidebar
 
     for (const child of node.children) {
       const childName = nodePath.basename(child.url)
@@ -84,44 +76,7 @@ export const generateSidebar: ConfigPlugin<DefaultTheme.SidebarItem | null, [url
   )
 }
 
-export const autoSidebar: ConfigPlugin = (
-  config, ctx
-) => {
-  if (!Array.isArray(config.themeConfig?.autoSidebar) || !ctx?.fileTreeMap) return
-
-  const sidebarConfig: DefaultTheme.SidebarMulti = {}
-
-  // File tree traversal
-  for (const {
-    link, deep
-  } of config.themeConfig.autoSidebar) {
-    const sidebar = generateSidebar(
-      config,
-      ctx,
-      link
-        .replace(
-          /^\/+|\/+$/g, ''
-        )
-        .replace(
-          /^$/g, '.'
-        ),
-      deep
-    )
-
-    if (!sidebar) continue
-
-    Object.assign(
-      sidebarConfig, {
-        [link.replace(
-          /^\/*(.*?)\/*$/, '/$1/'
-        )]: sidebar
-      }
-    )
-  }
-  config.themeConfig.sidebar = sidebarConfig
-}
-
-export const generateNavbar: ConfigPlugin<DefaultTheme.NavItemWithChildren | DefaultTheme.NavItemChildren | DefaultTheme.NavItemWithLink | null, [url: string, deep: 1 | 2 | 3]> = (
+export const generateNavbar: ConfigWorker<DefaultTheme.NavItemWithChildren | DefaultTheme.NavItemChildren | DefaultTheme.NavItemWithLink | null, [url: string, deep: 1 | 2 | 3]> = (
   _config, ctx, url: string, deep: 1 | 2 | 3
 ) => {
   const traverse = (
@@ -129,7 +84,7 @@ export const generateNavbar: ConfigPlugin<DefaultTheme.NavItemWithChildren | Def
   ): DefaultTheme.NavItemWithChildren | DefaultTheme.NavItemChildren | DefaultTheme.NavItemWithLink => {
     const children = node.file?.data.order
 
-    if (node.isPage || children === false || traverseDeep < 1) traverseDeep = 1
+    if (children === false || traverseDeep < 1) traverseDeep = 1
 
     const items: (DefaultTheme.NavItemChildren | DefaultTheme.NavItemWithLink)[] = []
 
@@ -161,17 +116,23 @@ export const generateNavbar: ConfigPlugin<DefaultTheme.NavItemWithChildren | Def
     switch (traverseDeep) {
       case 1:
         return {
-          text: node.file?.data.name ?? node.file?.data.title ?? nodePath.basename(node.url),
+          text: nodePath.basename(
+            node.path, nodePath.extname(node.path)
+          ),
           link: node.url
         }
       case 2:
         return {
-          text: node.file?.data.name ?? node.file?.data.title ?? nodePath.basename(node.url),
+          text: nodePath.basename(
+            node.path, nodePath.extname(node.path)
+          ),
           items
         }
       case 3:
         return {
-          text: node.file?.data.name ?? node.file?.data.title ?? nodePath.basename(node.url),
+          text: nodePath.basename(
+            node.path, nodePath.extname(node.path)
+          ),
           items,
           activeMatch: node.url
         }
@@ -185,41 +146,73 @@ export const generateNavbar: ConfigPlugin<DefaultTheme.NavItemWithChildren | Def
   )
 }
 
-export const autoNavbar: ConfigPlugin = (
+export const navigationPlugin: ConfigPlugin = (
   config, ctx
 ) => {
-  if (!config.themeConfig?.autoNavbar || !ctx?.fileTreeMap || !config.locales) return
+  if (!ctx?.fileTree || !ctx.fileTreeMap) {
+    throw new Error('Please apply filePlugin before navigationPlugin.')
+  }
+  // Auto Sidebar
+  if (Array.isArray(config.themeConfig?.autoSidebar)) {
+    const sidebarConfig: DefaultTheme.SidebarMulti = {}
 
+    // File tree traversal
+    for (const {
+      link, deep
+    } of config.themeConfig.autoSidebar) {
+      const sidebar = generateSidebar(
+        config,
+        ctx,
+        link
+          .replace(
+            /^\/+|\/+$/g, ''
+          ),
+        deep
+      )
+
+      if (!sidebar) continue
+
+      Object.assign(
+        sidebarConfig, {
+          [link.replace(
+            /^\/*(.*?)\/*$/, '/$1/'
+          )]: [sidebar]
+        }
+      )
+    }
+    config.themeConfig.sidebar = sidebarConfig
+  }
+
+  // Auto Navebar
+  if (config.themeConfig?.autoNavbar && ctx?.fileTreeMap && config.locales) {
   // File tree traversal
-  for (const [
-    lang,
-    items
-  ] of Object.entries(config.themeConfig.autoNavbar as Record<string, AutoNavigationConfig[]>)) {
-    if (Object.keys(config.locales ?? {})
-      .includes(lang)) {
-      for (const {
-        link, deep
-      } of items) {
-        const navbar = generateNavbar(
-          config,
-          ctx,
-          link
-            .replace(
-              /^\/+|\/+$/g, ''
-            )
-            .replace(
-              /^$/g, '.'
-            ),
-          deep as 1 | 2 | 3
-        )
+    for (const [
+      lang,
+      items
+    ] of Object.entries(config.themeConfig.autoNavbar as Record<string, AutoNavigationConfig[]>)) {
+      if (Object.keys(config.locales ?? {})
+        .includes(lang)) {
+        for (const {
+          link, deep
+        } of items) {
+          const navbar = generateNavbar(
+            config,
+            ctx,
+            link
+              .replace(
+                /^\/+|\/+$/g, ''
+              ),
+            deep as 1 | 2 | 3
+          )
 
-        if (!navbar) continue
-        config.locales[lang].themeConfig = {
-          ...config.locales[lang].themeConfig ?? [],
-          nav: [
-            ...config.locales[lang].themeConfig?.nav ?? [],
-            navbar
-          ]
+          if (!navbar) continue
+          config.locales[lang].themeConfig = {
+            ...config.locales[lang].themeConfig ?? [],
+            nav: [
+              ...config.locales[lang].themeConfig?.nav ?? [],
+              navbar
+            ]
+          }
         }
       }
     }

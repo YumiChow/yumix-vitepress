@@ -3,8 +3,9 @@ import type {
 } from 'vitepress'
 import nodePath from 'node:path'
 import grayMatter from 'gray-matter'
-import type { ConfigPlugin } from '..'
+import type { ConfigWorker } from '..'
 import type { NavigationFrontmatter } from './navigation'
+import type { FileFrontmatter } from './file'
 
 export interface MarkdownPluginConfig { fallbackTitle: 'h1' | false }
 
@@ -152,21 +153,11 @@ export interface DefaultFrontmatter extends DefaultThemeFrontmatter {
 /**
  * Frontmatter
  */
-export interface Frontmatter extends DefaultFrontmatter, NavigationFrontmatter {
-  /**
-   * Permalink
-   */
-  permalink?: string
-
-  /**
-   * Slug
-   */
-  slug?: string
-}
+export interface Frontmatter extends Omit<DefaultFrontmatter, 'layout'>, FileFrontmatter, NavigationFrontmatter {}
 
 export interface MarkdownFile extends Omit<grayMatter.GrayMatterFile<string>, 'data'> { data: Frontmatter }
 
-export const readMarkdownFile: ConfigPlugin<MarkdownFile | null, [string]> = (
+export const readMarkdownFile: ConfigWorker<MarkdownFile | null, [path: string]> = (
   config, _ctx, path: string
 ) => {
   if (nodePath.extname(path) !== '.md') return null
