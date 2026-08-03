@@ -4,7 +4,7 @@ import type {
 import nodePath from 'node:path'
 import grayMatter from 'gray-matter'
 import type { ConfigPlugin } from '..'
-import type { SidebarFrontmatter } from './sidebar'
+import type { NavigationFrontmatter } from './navigation'
 
 export interface MarkdownPluginConfig { fallbackTitle: 'h1' | false }
 
@@ -152,12 +152,7 @@ export interface DefaultFrontmatter extends DefaultThemeFrontmatter {
 /**
  * Frontmatter
  */
-export interface Frontmatter extends DefaultFrontmatter {
-  /**
-   * Sidebar Config
-   */
-  sidebarConfig?: SidebarFrontmatter
-
+export interface Frontmatter extends DefaultFrontmatter, NavigationFrontmatter {
   /**
    * Permalink
    */

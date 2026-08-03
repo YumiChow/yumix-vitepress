@@ -1,17 +1,14 @@
 import type { UserConfig } from 'vitepress'
 import {
-  configPlugins, type ThemeConfig
+  applyConfigPlugins, type ThemeConfig
 } from './config'
 
 export const defineConfig = (config: UserConfig<ThemeConfig>): UserConfig<ThemeConfig> => {
   const ctx = {}
 
-  for (const plugin of Object.values(configPlugins)) {
-    plugin(
-      config,
-      ctx
-    )
-  }
+  applyConfigPlugins(
+    config, ctx
+  )
 
   return config
 }

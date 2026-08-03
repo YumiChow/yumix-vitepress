@@ -17,6 +17,7 @@ export interface FileTree {
   url: string
   file: MarkdownFile | null
   children: FileTree[]
+  isPage: boolean
 }
 
 export const createFileTree: ConfigPlugin = (
@@ -25,6 +26,8 @@ export const createFileTree: ConfigPlugin = (
   const srcDir = config.srcDir ?? 'docs'
   const srcExclude = config.srcExclude ?? []
   const rewrites: UserConfig['rewrites'] = {}
+
+  ctx.fileTreeMap = {}
 
   const scanDir = (
     path: string, url: string
@@ -53,7 +56,8 @@ export const createFileTree: ConfigPlugin = (
       path,
       url,
       file,
-      children: []
+      children: [],
+      isPage: stats.isFile()
     }
 
     const urlSafe = /^(?!\.\.$)[a-zA-Z0-9\_\-\.\/]+$/
@@ -63,7 +67,7 @@ export const createFileTree: ConfigPlugin = (
       const slug = file?.data.slug?.trim()
 
       if (slug && urlSafe.test(slug)) {
-        url = nodePath.posix.join(
+        node.url = url = nodePath.posix.join(
           nodePath.posix.dirname(url), slug
         )
           .replace(
@@ -123,6 +127,10 @@ export const createFileTree: ConfigPlugin = (
         if (child) node.children.push(child)
       })
     }
+
+    Object.assign(
+      ctx.fileTreeMap ?? {}, { [url]: node }
+    )
 
     return node
   }

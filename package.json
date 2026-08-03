@@ -1,6 +1,6 @@
 {
   "name": "@yumix/vitepress",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Yumi's VitePress Toolkit",
   "main": "./dist/node/index.mjs",
   "module": "./dist/node/index.mjs",
