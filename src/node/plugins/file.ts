@@ -164,29 +164,29 @@ export const filePlugin: ConfigPlugin = (
     ...rewrites
   }
 
-  // const transformPageData = config.transformPageData
+  const transformPageData = config.transformPageData
 
-  // config.transformPageData = (
-  //   pageData, context
-  // ) => {
-  //   const children = pageData.frontmatter.order as string[] ?? []
+  config.transformPageData = (
+    pageData, context
+  ) => {
+    const children = pageData.frontmatter.order as string[] ?? []
 
-  //   pageData.frontmatter.order = (ctx.fileTreeMap ?? {})[nodePath.dirname(pageData.relativePath)
-  //   ].children.map(e => nodePath.basename(
-  //     e.url, nodePath.extname(e.url)
-  //   ))
-  //     .sort((
-  //       a, b
-  //     ) => {
-  //       if (children.includes(a) && children.includes(b)) {
-  //         return children.indexOf(a) - children.indexOf(b)
-  //       } else {
-  //         return children.includes(a) ? -1 : 1
-  //       }
-  //     })
+    pageData.frontmatter.order = (ctx.fileTreeMap ?? {})[nodePath.dirname(pageData.relativePath)
+    ].children.map(e => nodePath.basename(
+      e.url, nodePath.extname(e.url)
+    ))
+      .sort((
+        a, b
+      ) => {
+        if (children.includes(a) && children.includes(b)) {
+          return children.indexOf(a) - children.indexOf(b)
+        } else {
+          return children.includes(a) ? -1 : 1
+        }
+      })
 
-  //   if (transformPageData) transformPageData(
-  //     pageData, context
-  //   )
-  // }
+    if (transformPageData) transformPageData(
+      pageData, context
+    )
+  }
 }

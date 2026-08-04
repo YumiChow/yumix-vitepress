@@ -16,7 +16,7 @@ export const redirectPlugin: GuardPlugin = (ctx) => {
       // useRedirect
       const redirect = ctx.router.route.data.frontmatter.redirect as unknown
 
-      if (ctx.siteData.value.themeConfig.useRedirect && typeof redirect === 'string') {
+      if (ctx.siteData.value.themeConfig.useRedirect && typeof redirect === 'string' && to !== redirect) {
         await ctx.router.go(
           redirect, { replace: true }
         )
