@@ -44,10 +44,10 @@ export interface GuardWorker<T = string, U extends unknown[] = []> { (ctx: Guard
 
 export const guardPlugins: Record<string, GuardPlugin> = { redirectPlugin }
 
-export const theme = {
+export const theme: Theme = {
   Layout,
   enhanceApp: (ctx: GuardPluginContext) => {
     Object.values(guardPlugins)
       .forEach(e => e(ctx))
   }
-} satisfies Theme
+}

@@ -1,6 +1,6 @@
 {
   "name": "@yumix/vitepress",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Yumi's VitePress Toolkit",
   "main": "./dist/node/index.mjs",
   "module": "./dist/node/index.mjs",
@@ -20,7 +20,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "unbuild"
+    "build": "obuild"
   },
   "engines": {
     "node": ">=22"
@@ -47,14 +47,14 @@
   "dependencies": {
     "gray-matter": "^4",
     "picomatch": "^4",
-    "vitepress": "^2.0.0-alpha",
-    "vue": "^3.5"
+    "vitepress": "^2.0.0-alpha"
   },
   "devDependencies": {
-    "@types/node": "^26.1.2",
+    "vue": "^3.5.41",
+    "@types/node": "^26.2.0",
     "@types/picomatch": "^4.0.3",
-    "@yumix/eslint": "^1.0.4",
-    "unbuild": "^3.6.1",
+    "@yumix/eslint": "^1.0.5",
+    "obuild": "^0.4.38",
     "vue-sfc-transformer": "^0.2.5",
     "vue-tsc": "^3.3.9"
   }

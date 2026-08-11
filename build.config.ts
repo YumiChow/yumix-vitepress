@@ -1,14 +1,11 @@
-import { defineBuildConfig } from 'unbuild'
+import { defineBuildConfig } from 'obuild/config'
 
 export default defineBuildConfig({
   entries: [
     {
-      builder: 'mkdist',
+      type: 'transform',
       input: './src',
       outDir: './dist'
     }
-  ],
-  declaration: true,
-  clean: true,
-  rollup: { esbuild: { target: 'esnext' } }
+  ]
 })
